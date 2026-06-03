@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 출석 집계 시스템</title>
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active"><i data-lucide="layout-dashboard"></i> 대시보드</a>
+                <a href="#" class="nav-item"><i data-lucide="users"></i> 학생 관리</a>
+                <a href="#" class="nav-item"><i data-lucide="settings"></i> 시스템 설정</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-title">출석 현황 대시보드</div>
+                <button id="refreshBtn" class="btn-primary"><i data-lucide="refresh-cw"></i> 새로고침</button>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Notice Card -->
+                <div class="notice-card">
+                    <div class="notice-icon"><i data-lucide="bell"></i></div>
+                    <div class="notice-text">
+                        <h3>관리자 알림</h3>
+                        <p>출석을 시작하기 전에 구글 스프레드시트 <strong>'설정'</strong> 시트의 <strong>B1</strong> 셀에 <strong>오늘의 출석 코드</strong>를 설정해주세요.</p>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="users"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">오늘 총 출석 인원</span>
+                            <span class="stat-value" id="today-total">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="clock"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">최근 출석 시간</span>
+                            <span class="stat-value" id="last-attendance">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i data-lucide="book-open"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">전체 출석 기록 수</span>
+                            <span class="stat-value" id="total-records">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table Section -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>최근 출석 기록</h3>
+                    </div>
+                    
+                    <div id="loading-spinner" class="loading-container">
+                        <i data-lucide="loader-2" class="spinner"></i>
+                        <p>데이터를 불러오는 중입니다...</p>
+                    </div>
+
+                    <div class="table-container" id="table-container" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>타임스탬프</th>
+                                    <th>학번</th>
+                                    <th>이름</th>
+                                    <th>수강 과목</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="admin.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

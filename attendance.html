@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>학생 출석 체크</title>
+    <link rel="stylesheet" href="attendance.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+</head>
+<body>
+    <!-- Background Animated Blobs -->
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>출석 체크</h1>
+            <p>오늘의 출석을 기록해주세요</p>
+        </header>
+
+        <form id="attendanceForm" class="glass-form">
+            <div class="input-group">
+                <label for="studentName">이름</label>
+                <input type="text" id="studentName" placeholder="홍길동" required autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label for="studentId">학번</label>
+                <input type="text" id="studentId" placeholder="예: 20230101" required autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label>수강 과목 <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(다중 선택 가능)</span></label>
+                <div class="checkbox-grid">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="course" value="인공지능">
+                        <span class="checkmark"></span>
+                        <span class="label-text">인공지능</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="course" value="미술">
+                        <span class="checkmark"></span>
+                        <span class="label-text">미술</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="course" value="음악">
+                        <span class="checkmark"></span>
+                        <span class="label-text">음악</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="course" value="체육">
+                        <span class="checkmark"></span>
+                        <span class="label-text">체육</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="course" value="요리">
+                        <span class="checkmark"></span>
+                        <span class="label-text">요리</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="attendanceCode">출석 코드</label>
+                <input type="text" id="attendanceCode" placeholder="4자리 숫자 입력" maxlength="4" pattern="\d{4}" required autocomplete="off" inputmode="numeric">
+            </div>
+            
+            <button type="submit" id="submitBtn" class="submit-btn">
+                <span class="btn-text">제출하기</span>
+                <span class="loader"></span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="attendance.js"></script>
+</body>
+</html>
