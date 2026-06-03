@@ -18,9 +18,9 @@
                 <h2>Admin</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active"><i data-lucide="layout-dashboard"></i> 대시보드</a>
-                <a href="#" class="nav-item"><i data-lucide="users"></i> 학생 관리</a>
-                <a href="#" class="nav-item"><i data-lucide="settings"></i> 시스템 설정</a>
+                <a href="#" class="nav-item active" data-tab="attendance" id="tab-attendance"><i data-lucide="layout-dashboard"></i> 출석 현황 대시보드</a>
+                <a href="#" class="nav-item" data-tab="register" id="tab-register"><i data-lucide="users"></i> 학생 관리 (수강신청)</a>
+                <a href="#" class="nav-item" data-tab="settings" id="tab-settings"><i data-lucide="settings"></i> 시스템 설정</a>
             </nav>
         </aside>
 
@@ -92,6 +92,20 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="settings-card" id="settings-container" style="display: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); padding: 30px; border-radius: 16px; margin-top: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);">
+                    <h3 style="margin-bottom: 20px; color: #1e1e1e;">시스템 설정</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label for="current-code" style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">현재 출석 코드</label>
+                        <input type="text" id="current-code" readonly style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #f5f5f5; color: #333; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label for="new-code" style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">새로운 출석 코드 변경</label>
+                        <input type="text" id="new-code" placeholder="예: 4자리 숫자 입력" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #c7d2fe; font-size: 16px; outline: none;">
+                    </div>
+                    <button id="updateCodeBtn" style="padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">출석 코드 변경하기</button>
                 </div>
             </div>
         </main>

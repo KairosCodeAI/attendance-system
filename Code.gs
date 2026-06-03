@@ -21,34 +21,44 @@ const ATTENDANCE_SHEET_NAME = '출석기록';
  */
 function doGet(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ATTENDANCE_SHEET_NAME);
+    var type = e.parameter.type || 'attendance';
     
-    // 출석기록 시트가 없을 경우 에러 메시지 반환
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({status: "error", message: "출석기록 시트를 찾을 수 없습니다."}))
+    // 설정 탭 데이터를 요청할 경우
+    if (type === 'settings') {
+      var settingsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SETTINGS_SHEET_NAME);
+      if (!settingsSheet) throw new Error("'설정' 시트를 찾을 수 없습니다.");
+      var currentCode = settingsSheet.getRange("B1").getValue().toString().trim();
+      return ContentService.createTextOutput(JSON.stringify({status: "success", currentCode: currentCode}))
                            .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 데이터가 있는 전체 범위를 가져옵니다.
-    var data = sheet.getDataRange().getValues();
+    var sheetName = (type === 'register') ? REGISTRATION_SHEET_NAME : ATTENDANCE_SHEET_NAME;
+    
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({status: "error", message: sheetName + " 시트를 찾을 수 없습니다."}))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
 
-    // 첫 번째 줄(보통 헤더: 타임스탬프, 학번 등)을 제외한 나머지 데이터를 배열로 변환합니다.
+    var data = sheet.getDataRange().getValues();
     var records = [];
-    for (var i = 1; i < data.length; i++) {
+    
+    for (var i = 0; i < data.length; i++) {
+      // 헤더인 경우 건너뜁니다
+      if (data[i][0] === '타임스탬프' || data[i][0] === '신청시간' || data[i][0] === '') continue;
+      
       records.push({
-        timestamp: data[i][0],    // 타임스탬프 (출석 시간)
-        studentId: data[i][1],    // 학번
-        studentName: data[i][2],  // 이름
-        courses: data[i][3]       // 신청 과목
+        timestamp: data[i][0],
+        studentId: data[i][1],
+        studentName: data[i][2],
+        courses: data[i][3]
       });
     }
 
-    // 추출한 데이터를 JSON 형식(웹에서 읽기 쉬운 형태)으로 반환합니다.
     return ContentService.createTextOutput(JSON.stringify({status: "success", data: records}))
                          .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    // 오류 발생 시 오류 내용을 반환합니다.
     return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.message}))
                          .setMimeType(ContentService.MimeType.JSON);
   }
@@ -63,49 +73,64 @@ function doPost(e) {
   try {
     // 클라이언트(학생 화면)에서 보낸 데이터를 자바스크립트 객체로 변환합니다.
     var payload = JSON.parse(e.postData.contents);
+    var action = payload.action || 'attendance'; // 'register' 또는 'attendance'
 
     var studentName = payload.studentName;
     var studentId = payload.studentId;
     var courses = payload.courses; // 배열(예: ['인공지능', '미술']) 또는 문자열
     var attendanceCode = payload.attendanceCode;
 
-    // 1. 현재 연결된 스프레드시트 열기 및 '설정' 시트 가져오기
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var settingsSheet = ss.getSheetByName(SETTINGS_SHEET_NAME);
-
-    // 설정 시트가 없는 경우 에러 처리
-    if (!settingsSheet) {
-      return ContentService.createTextOutput(JSON.stringify({status: "error", message: "'설정' 시트를 찾을 수 없습니다. 시트 이름을 확인하세요."}))
-                           .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // 2. 오늘의 출석 코드 확인 (설정 시트의 B1 셀에 출석 코드가 있다고 가정합니다)
-    // 공백을 제거하고 문자열로 변환하여 정확히 비교합니다.
-    var actualCode = settingsSheet.getRange("B1").getValue().toString().trim();
-    var submittedCode = attendanceCode.toString().trim();
-
-    // 대리 출석 방지: 학생이 입력한 코드와 B1 셀의 코드가 다르면 에러를 반환합니다.
-    if (actualCode !== submittedCode) {
-      return ContentService.createTextOutput(JSON.stringify({status: "error", message: "출석 코드가 일치하지 않습니다."}))
-                           .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // 3. 코드가 일치하면 '출석기록' 시트에 데이터를 추가합니다.
-    var attendanceSheet = ss.getSheetByName(ATTENDANCE_SHEET_NAME);
-    if (!attendanceSheet) {
-      // 출석기록 시트가 실수로 지워진 경우 자동으로 생성하고 첫 줄(헤더)을 작성합니다.
-      attendanceSheet = ss.insertSheet(ATTENDANCE_SHEET_NAME);
-      attendanceSheet.appendRow(['타임스탬프', '학번', '이름', '신청과목']);
-    }
-
     // 신청 과목 데이터가 배열일 경우(예: ['수학', '영어']) 콤마로 구분된 문자열('수학, 영어')로 변환합니다.
     var coursesString = Array.isArray(courses) ? courses.join(', ') : courses;
-
-    // 현재 시간을 가져옵니다.
     var now = new Date();
 
-    // 출석기록 시트의 마지막 줄에 [출석시간, 학번, 이름, 과목] 정보를 새롭게 한 줄 추가합니다.
-    attendanceSheet.appendRow([now, studentId, studentName, coursesString]);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (action === 'update_code') {
+      // --- 출석 코드 변경 처리 로직 ---
+      var newCode = payload.newCode;
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var settingsSheet = ss.getSheetByName(SETTINGS_SHEET_NAME);
+      if (!settingsSheet) throw new Error("'설정' 시트를 찾을 수 없습니다.");
+      settingsSheet.getRange("B1").setValue(newCode);
+      return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+                           .setMimeType(ContentService.MimeType.JSON);
+                           
+    } else if (action === 'register') {
+      // --- 수강신청 처리 로직 ---
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var regSheet = ss.getSheetByName(REGISTRATION_SHEET_NAME);
+      if (!regSheet) {
+        regSheet = ss.insertSheet(REGISTRATION_SHEET_NAME);
+        regSheet.appendRow(['신청시간', '학번', '이름', '신청과목']);
+      }
+      regSheet.appendRow([now, studentId, studentName, coursesString]);
+      
+    } else {
+      // --- 출석체크 처리 로직 (기존) ---
+      // 1. 오늘의 출석 코드 확인 (설정 시트의 B1 셀)
+      var settingsSheet = ss.getSheetByName(SETTINGS_SHEET_NAME);
+      if (!settingsSheet) {
+        return ContentService.createTextOutput(JSON.stringify({status: "error", message: "'설정' 시트를 찾을 수 없습니다."}))
+                             .setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      var actualCode = settingsSheet.getRange("B1").getValue().toString().trim();
+      var submittedCode = (attendanceCode || "").toString().trim();
+
+      // 대리 출석 방지
+      if (actualCode !== submittedCode) {
+        return ContentService.createTextOutput(JSON.stringify({status: "error", message: "출석 코드가 일치하지 않습니다."}))
+                             .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      // 출석기록 시트에 추가
+      var attendanceSheet = ss.getSheetByName(ATTENDANCE_SHEET_NAME);
+      if (!attendanceSheet) {
+        attendanceSheet = ss.insertSheet(ATTENDANCE_SHEET_NAME);
+        attendanceSheet.appendRow(['타임스탬프', '학번', '이름', '신청과목']);
+      }
+      attendanceSheet.appendRow([now, studentId, studentName, coursesString]);
+    }
 
     // 4. 모든 과정이 성공적으로 끝나면 성공 메시지를 반환합니다.
     return ContentService.createTextOutput(JSON.stringify({status: "success"}))
