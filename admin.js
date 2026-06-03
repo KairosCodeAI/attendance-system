@@ -137,7 +137,7 @@ function renderData(data) {
         
         // Name
         const tdName = document.createElement('td');
-        tdName.textContent = row.Name || row['이름'] || row['name'] || '-';
+        tdName.textContent = row.Name || row['이름'] || row['name'] || row.studentName || '-';
         
         // Courses
         const tdCourses = document.createElement('td');
