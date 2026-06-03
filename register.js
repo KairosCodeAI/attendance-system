@@ -1,5 +1,5 @@
 // 여기에 배포된 Google Apps Script 웹앱 URL을 입력하세요.
-const GAS_WEB_APP_URL = "여기에_웹앱_URL을_붙여넣으세요";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby2nwFxRp_1WNqT30Bjmhx7c2lgqFSdfeyM9iABt3xTroDR3NPsmBr8jw391SMf8niz/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
